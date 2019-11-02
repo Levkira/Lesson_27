@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Star Wars</title>
+    <style>
+        .people-list, .movies-list {
+            border: 0;
+            color: #fff;
+            font-size: 16px;
+            padding: 2px 10px;
+            width: 350px;
+            background: rgb(18, 70, 119);
+        }
+        .movies-list {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <form>
+        <p><select class="people-list" size="1">
+            <option selected>Pick a character</option> 
+        </select></p>
+        <p><select class="movies-list" size="1">
+        </select></p>
+    </form>
+<script>
+    const url = 'https://swapi.co/api/people/';
+    const pickCharacter = document.querySelector('.people-list');
+    const pickMovie = document.querySelector('.movies-list');
+
+    const getData = async url => {
+        let currentUrl = url;
+        let allPeople = [];
+        do {
+            const response = await fetch(currentUrl);
+            const data = await response.json();
+            currentUrl = data.next;
+            allPeople = [...allPeople, ...data.results];
+        } while(currentUrl);
+        return allPeople;
+    }
+
+    const getFilms = async url => {
+        let currentUrl = url;
+        const response = await fetch(currentUrl);
+        const data = await response.json();
+        return data.title;
+    }
+
+    getData(url)
+        .then(function(arr) {
+            arr.forEach(el => {
+                const swOption = document.createElement('option');
+                swOption.innerText = el.name;
+                pickCharacter.append(swOption);
+            })
+            return arr;
+        }).then(function(arr) {
+            pickCharacter.addEventListener('change', e => {
+                const character = arr.find(function(el) {
+                    return el.name === e.target.value;
+                });
+                pickMovie.innerHTML = '';
+                character.films.forEach(function(el) {
+                    getFilms(el).then(function(res) {
+                        const swOption = document.createElement('option');
+                        swOption.innerText = res;
+                        pickMovie.append(swOption);
+                        pickMovie.style.display = 'block';
+                    })
+                    
+                })
+            })
+        })
+</script>
+</body>
+</html>
